@@ -9,6 +9,14 @@
         "message": "chore(release): ${nextRelease.version}"
       }
     ],
-    "@semantic-release/github"
+    "@semantic-release/github",
+    {
+        "successComment": false,
+        "failComment": false,
+        "assets": [],
+        "releasedLabels": false,
+        "releaseName": "Release ${nextRelease.version}",
+        "releaseBody": "Versión automática generada por CI/CD."
+    }
   ]
 }
