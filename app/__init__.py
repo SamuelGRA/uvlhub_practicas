@@ -1,5 +1,6 @@
 import os
 # linea1
+# linea 2
 from dotenv import load_dotenv
 from flask import Flask
 from flask_migrate import Migrate
