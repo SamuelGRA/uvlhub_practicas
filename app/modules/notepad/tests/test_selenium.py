@@ -1,35 +1,65 @@
-from selenium.common.exceptions import NoSuchElementException
-import time
+import pytest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-from core.environment.host import get_host_for_selenium_testing
-from core.selenium.common import initialize_driver, close_driver
+class TestNotepad:
 
+    def setup_method(self, method):
+        self.driver = webdriver.Chrome()
+        self.wait = WebDriverWait(self.driver, 10)
 
-def test_notepad_index():
+    def teardown_method(self, method):
+        self.driver.quit()
 
-    driver = initialize_driver()
+    def login(self):
+        driver = self.driver
+        wait = self.wait
 
-    try:
-        host = get_host_for_selenium_testing()
+        driver.get("http://127.0.0.1:5000/")
+        driver.find_element(By.CSS_SELECTOR, ".nav-link:nth-child(1)").click()
 
-        # Open the index page
-        driver.get(f'{host}/notepad')
+        email_input = wait.until(EC.presence_of_element_located((By.ID, "email")))
+        password_input = driver.find_element(By.ID, "password")
+        submit_btn = driver.find_element(By.ID, "submit")
 
-        # Wait a little while to make sure the page has loaded completely
-        time.sleep(4)
+        email_input.send_keys("user1@example.com")
+        password_input.send_keys("1234")
+        submit_btn.click()
 
-        try:
+    def test_notepad_crud(self):
+        driver = self.driver
+        wait = self.wait
 
-            pass
+        self.login()
 
-        except NoSuchElementException:
-            raise AssertionError('Test failed!')
+        # Navegar a la url de create
+        driver.get("http://127.0.0.1:5000/notepad/create")
 
-    finally:
+        # Pruebas de create
+        title_input = wait.until(EC.presence_of_element_located((By.ID, "title")))
+        body_input = driver.find_element(By.ID, "body")
+        submit_btn = driver.find_element(By.ID, "submit")
 
-        # Close the browser
-        close_driver(driver)
+        title_input.send_keys("Esto es una prueba")
+        body_input.send_keys("Hola, estoy probando")
+        submit_btn.click()
 
+        # Pruebas de editar
+        edit_link = wait.until(EC.presence_of_element_located((By.LINK_TEXT, "Edit")))
+        edit_link.click()
 
-# Call the test function
-test_notepad_index()
+        title_input = wait.until(EC.presence_of_element_located((By.ID, "title")))
+        body_input = driver.find_element(By.ID, "body")
+        submit_btn = driver.find_element(By.ID, "submit")
+
+        title_input.clear()
+        title_input.send_keys("Esto es una prueba otra vez")
+        body_input.clear()
+        body_input.send_keys("Hola, estoy probando de nuevo")
+        submit_btn.click()
+
+        # Prueba de borrar
+        delete_btn = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button")))
+        delete_btn.click()
